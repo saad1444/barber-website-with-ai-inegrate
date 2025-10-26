@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barber Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', Arial, sans-serif; /* Using a modern font */
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* --- Header and Navigation --- */
+header {
+    background: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav {
+    background: #222;
+    color: white;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    flex-wrap: wrap; /* Allows links to wrap on small screens */
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 5px 20px;
+    font-size: 18px;
+    position: relative;
+    padding: 5px 0; /* Ensures better tap target */
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: #ff4500;
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* --- Section Layouts --- */
+.section {
+    padding: 20px;
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the main content */
+}
+
+.section.active {
+    display: block;
+}
+
+.services,
+.team {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Default 3 columns for desktop */
+    gap: 25px; /* Increased gap for visual appeal */
+    margin-top: 30px;
+}
+
+/* --- Cards (Service/Team) --- */
+.service-item,
+.team-member {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    padding: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Fluid Images for Responsiveness */
+.service-item img,
+.team-member img {
+    width: 100%; /* Image takes full width of card */
+    max-height: 300px;
+    aspect-ratio: 1/1; /* Maintain square ratio */
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 10px auto;
+    transition: transform 0.3s ease;
+}
+
+.service-item:hover img,
+.team-member:hover img {
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.service-item:hover,
+.team-member:hover {
+    transform: translateY(-8px); /* Lift effect */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+}
+
+
+/* --- Forms --- */
+.book-form {
+    max-width: 600px;
+    margin: 30px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.book-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #222;
+}
+
+.book-form input,
+.book-form select,
+.book-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+.book-form input:focus,
+.book-form select:focus,
+.book-form textarea:focus {
+    border-color: #ff4500;
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 69, 0, 0.5);
+}
+
+.book-form button {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.book-form button:hover {
+    background: #ff4500;
+    transform: translateY(-2px);
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    background: #222;
+    color: white;
+    padding: 20px;
+    margin-top: 40px;
+}
+.muted {
+    text-align: center;
+    margin-top: 10px;
+    color: #888;
+}
+
+
+/* --- AI Chatbot Specific Styles --- */
+:root {
+    --accent: #00bcd4;
+    --glow-accent: #00bcd4;
+    --muted: #a0e7ff;
+}
+
+#chatToggle {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg,#04202b,#004d66);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0,255,255,0.3), 0 8px 18px rgba(0,0,0,0.6);
+    color: var(--glow-accent);
+    font-size: 30px;
+    transition: 0.3s;
+}
+#chatToggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px var(--glow-accent), 0 10px 20px rgba(0,0,0,0.6);
+}
+
+#chatPopup {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    right: 22px;
+    width: 400px; 
+    max-height: 520px;
+    background: linear-gradient(180deg,#0c1b28,#07141a);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,255,255,0.2), 0 10px 30px rgba(0,0,0,0.7);
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    border: 1px solid rgba(255,255,255,0.04);
+    animation: popupFade 0.4s ease forwards;
+    color: #e6eef6;
+}
+@keyframes popupFade {
+    from { transform: translateY(20px); opacity:0; }
+    to { transform: translateY(0); opacity:1; }
+}
+
+#chatBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #e6eef6;
+}
+
+/* Message and Typing styles are fine for responsiveness */
+.msg {
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 75%;
+    white-space: pre-wrap;
+    position: relative;
+    font-weight: 500;
+    animation: msgFade 0.3s ease forwards;
+}
+.msg.user {
+    background: linear-gradient(90deg,#1a2b3c,#0f2230);
+    align-self: flex-end;
+    color: #5ee7ff; 
+    box-shadow: 0 0 12px rgba(94,231,255,0.4);
+}
+.msg.bot {
+    background: linear-gradient(90deg,#0f1b22,#081018);
+    align-self: flex-start;
+    border: 1px solid rgba(94,231,255,0.05);
+    color: #a0e7ff; 
+    box-shadow: inset 0 0 10px rgba(94,231,255,0.1);
+}
+@keyframes msgFade {
+    from { opacity:0; transform: translateY(10px); }
+    to { opacity:1; transform: translateY(0); }
+}
+
+/* Typing indicator dots */
+.dots {
+    display: inline-flex;
+    align-items: center;
+}
+.dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #a0e7ff;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: dotFlashing 1s infinite alternate;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotFlashing {
+    0% { opacity: 0.2; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-3px); }
+    100% { opacity: 0.2; transform: translateY(0); }
+}
+
+#userInput {
+    width: calc(100% - 24px);
+    padding: 12px;
+    margin: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.05);
+    color: inherit; 
+    outline: none;
+    box-shadow: inset 0 0 8px rgba(0,255,255,0.1);
+    transition: 0.3s;
+}
+#userInput:focus {
+    background: rgba(94,231,255,0.06);
+    box-shadow: 0 0 12px var(--glow-accent);
+}
+#chatControls {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px;
+}
+
+button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: linear-gradient(90deg,var(--accent),#3ec8ff);
+    color: #001;
+    font-weight: 700;
+    transition: 0.3s;
+}
+#closeChat {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--muted);
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+/* ------------------------------------------- */
+/* RESPONSIVENESS (Media Queries)    */
+/* ------------------------------------------- */
+
+/* Tablet & Smaller Screens (Max width 1024px) */
+@media (max-width: 1024px) {
+    .services,
+    .team {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablets */
+        gap: 20px;
+    }
+    .section {
+        padding: 15px;
+    }
+    nav a {
+        margin: 5px 15px;
+    }
+    
+    #chatPopup {
+        /* Adjust chat position on tablets */
+        width: 350px; 
+        max-height: 450px;
+        right: 15px;
+        bottom: 85px; 
+    }
+}
+
+/* Mobile Screens (Max width 600px) */
+@media (max-width: 600px) {
+    /* Main Content Layout */
+    .services,
+    .team {
+        grid-template-columns: 1fr; /* 1 column for phones (stacking) */
+        gap: 20px;
+    }
+    .service-item,
+    .team-member {
+        padding: 10px;
+    }
+    
+    /* Header and Navigation Stacking */
+    nav {
+        flex-direction: column; 
+        padding: 5px 10px;
+    }
+    nav a {
+        margin: 5px 0;
+        padding: 8px 0;
+        text-align: center;
+    }
+    
+    /* Forms */
+    .book-form {
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    /* Chat Adjustments for Mobile: Full width, adjusted height */
+    #chatToggle {
+        width: 60px;
+        height: 60px;
+        bottom: 15px;
+        right: 15px;
+        font-size: 26px;
+    }
+    #chatPopup {
+        width: calc(100% - 30px); /* Takes up almost all screen width */
+        max-height: calc(100vh - 120px); 
+        bottom: 80px;
+        left: 15px; /* Center alignment */
+        right: 15px;
+    }
+    .msg {
+        max-width: 90%; /* Give messages more space in the narrower chat window */
+    }
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Barber Shop</h1>
+        <p>Your perfect cut, every time!</p>
+    </header>
+
+    <nav>
+        <a href="#" onclick="showSection('home')">Home</a>
+        <a href="#" onclick="showSection('services')">Services</a>
+        <a href="#" onclick="showSection('book')">Book Appointment</a>
+        <a href="#" onclick="showSection('contact')">Contact</a>
+    </nav>
+
+    <div id="home" class="section active">
+        <h2>Welcome to Our Barber Shop</h2>
+        <p>We offer the best haircuts and grooming services to keep you looking sharp.</p>
+        <h3>Meet Our Team</h3>
+        <div class="team">
+            <div class="team-member">
+                <img src="download.jpeg" alt="Barber 1">
+                <h3>John Doe</h3>
+                <p>Expert in modern haircuts</p>
+            </div>
+            <div class="team-member">
+                <img src="s1.avif" alt="Barber 2">
+                <h3>Jane Smith</h3>
+                <p>Specialist in beard grooming</p>
+            </div>
+            <div class="team-member">
+                <img src="s2.avif" alt="Barber 3">
+                <h3>Mark Lee</h3>
+                <p>Traditional cuts and styles</p>
+            </div>
+            <div class="team-member">
+                <img src="s3.avif" alt="Barber 4">
+                <h3>Lisa Johnson</h3>
+                <p>Master in fades and trims</p>
+            </div>
+            <div class="team-member">
+                <img src="s4.avif" alt="Barber 5">
+                <h3>David Brown</h3>
+                <p>Classic barber with over 10 years of experience</p>
+            </div>
+            <div class="team-member">
+                <img src="s5.avif" alt="Barber 6">
+                <h3>Emily Clark</h3>
+                <p>Expert in stylish and trendy cuts</p>
+            </div>
+            <div class="team-member">
+                <img src="s6.avif" alt="Barber 7">
+                <h3>Tom Harris</h3>
+                <p>Beard and mustache specialist</p>
+            </div>
+            <div class="team-member">
+                <img src="s7.webp" alt="Barber 8">
+                <h3>Amy Taylor</h3>
+                <p>Expert in luxury grooming</p>
+            </div>
+            <div class="team-member">
+                <img src="s8.webp" alt="Barber 9">
+                <h3>Chris Walker</h3>
+                <p>Master of shaves and cuts</p>
+            </div>
+            <div class="team-member">
+                <img src="s9.jpg" alt="Barber 10">
+                <h3>Anna White</h3>
+                <p>Specializes in high-end styling</p>
+            </div>
+            <div class="team-member">
+                <img src="s10.jpg" alt="Barber 11">
+                <h3>Mark Davis</h3>
+                <p>Famous for his quick cuts and precise detailing</p>
+            </div>
+            <div class="team-member">
+                <img src="s11.jpg" alt="Barber 12">
+                <h3>Jessica Green</h3>
+                <p>Top stylist in the area</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="services" class="section">
+        <h2>Our Services</h2>
+        <div class="services">
+            <div class="service-item">
+                <img src="s1.avif" alt="Haircut">
+                <h3>Haircut</h3>
+                <p>A stylish cut to keep you fresh.</p>
+            </div>
+            <div class="service-item">
+                <img src="s9.jpg" alt="Beard Trim">
+                <h3>Beard Trim</h3>
+                <p>Shaped and styled to perfection.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa1.webp" alt="Shaving">
+                <h3>Shaving</h3>
+                <p>Close shave with a hot towel treatment.</p>
+            </div>
+            <div class="service-item">
+                <img src="s6.avif" alt="Hair Styling">
+                <h3>Hair Styling</h3>
+                <p>Perfect for any special occasion.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa2.webp" alt="Hair Coloring">
+                <h3>Hair Coloring</h3>
+                <p>Get the color you always wanted.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa3.avif" alt="Waxing">
+                <h3>Waxing</h3>
+                <p>Say goodbye to unwanted hair.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa4.avif" alt="Scalp Treatment">
+                <h3>Scalp Treatment</h3>
+                <p>Revitalize your scalp with a relaxing treatment.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa5.webp" alt="Facial">
+                <h3>Facial</h3>
+                <p>Perfect for freshening up your skin.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa6.webp" alt="Shampoo & Conditioning">
+                <h3>Shampoo & Conditioning</h3>
+                <p>Cleanse and nourish your hair.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa7.avif" alt="Head Massage">
+                <h3>Head Massage</h3>
+                <p>A soothing head massage for ultimate relaxation.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa8.webp" alt="Beard Styling">
+                <h3>Beard Styling</h3>
+                <p>Keep your beard looking sharp.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa9.webp" alt="Hot Towel Shave">
+                <h3>Hot Towel Shave</h3>
+                <p>Experience the classic shave.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa11.avif" alt="Mustache Styling">
+                <h3>Mustache Styling</h3>
+                <p>Keep your mustache in check.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa12.webp" alt="Hair Repair">
+                <h3>Hair Repair</h3>
+                <p>Fix dry, damaged hair with our treatments.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa13.webp" alt="Eyebrow Grooming">
+                <h3>Eyebrow Grooming</h3>
+                <p>Perfectly shaped brows for a sharp look.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa14.webp" alt="Nail Care">
+                <h3>Nail Care</h3>
+                <p>Take care of your hands and feet.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa15.avif" alt="Kids Haircut">
+                <h3>Kids Haircut</h3>
+                <p>Stylish cuts for little ones.</p>
+            </div>
+            <div class="service-item">
+                <img src="sa16.avif" alt="Grooming for Events">
+                <h3>Grooming for Events</h3>
+                <p>Get ready for weddings, parties, and more.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="book" class="section">
+        <h2>Book an Appointment</h2>
+        <form class="book-form">
+            <label for="name">Name</label>
+            <input type="text" id="name" placeholder="Enter your name" required>
+
+            <label for="service">Select Service</label>
+<select id="service" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+    <optgroup label="Hair Services">
+        <option value="Haircut">Haircut</option>
+        <option value="Hair Coloring">Hair Coloring</option>
+        <option value="Hair Styling">Hair Styling</option>
+        <option value="Hair Wash">Hair Wash</option>
+    </optgroup>
+    <optgroup label="Beard Services">
+        <option value="Beard Trim">Beard Trim</option>
+        <option value="Beard Styling">Beard Styling</option>
+        <option value="Beard Coloring">Beard Coloring</option>
+    </optgroup>
+    <optgroup label="Shaving">
+        <option value="Classic Shaving">Classic Shaving</option>
+        <option value="Hot Towel Shave">Hot Towel Shave</option>
+    </optgroup>
+    <optgroup label="Special Services">
+        <option value="Facial">Facial</option>
+        <option value="Massage">Massage</option>
+        <option value="Scalp Treatment">Scalp Treatment</option>
+    </optgroup>
+</select>
+
+
+            <label for="date">Appointment Date</label>
+            <input type="date" id="date" required>
+
+            <label for="time">Appointment Time</label>
+            <input type="time" id="time" required>
+
+            <button type="button" onclick="submitBooking()">Book Now</button>
+        </form>
+    </div>
+
+    <div id="contact" class="section">
+        <h2>Contact Us</h2>
+        <form class="book-form" onsubmit="submitContactForm(event)">
+            <label for="contact-name">Name</label>
+            <input type="text" id="contact-name" placeholder="Enter your name" required>
+    
+            <label for="contact-email">Email</label>
+            <input type="email" id="contact-email" placeholder="Enter your email" required>
+    
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" rows="5" placeholder="Your message" required></textarea>
+    
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+    
+    <div class="muted"> <span id="year"></span></div>
+    
+
+    <div id="chatToggle">💬</div>
+
+    <div id="chatPopup">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.06)">
+            <strong>NoirForge AI</strong>
+            <button id="closeChat" class="btn ghost">Close</button>
+        </div>
+        <div id="chatBody"></div>
+        <div id="chatControls">
+            <input id="userInput" placeholder="Type your message..."/>
+            <button id="sendBtn">Send</button>
+            
+        </div>
+    </div>
+
+    <footer style="background: #222; color: white; padding: 20px; text-align: center;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; max-width: 1200px; margin: 0 auto;">
+            <div style="flex: 1 1 300px; padding: 10px;">
+                <h3>About Us</h3>
+                <p>
+                    Barber Shop offers professional grooming services to give you the perfect look. We combine style, comfort, and expertise in one place.
+                </p>
+            </div>
+    
+            <div style="flex: 1 1 300px; padding: 10px;">
+                <h3>Quick Links</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a href="#" onclick="showSection('home')" style="color: #ff4500; text-decoration: none;">Home</a></li>
+                    <li><a href="#" onclick="showSection('services')" style="color: #ff4500; text-decoration: none;">Services</a></li>
+                    <li><a href="#" onclick="showSection('book')" style="color: #ff4500; text-decoration: none;">Book Appointment</a></li>
+                    <li><a href="#" onclick="showSection('contact')" style="color: #ff4500; text-decoration: none;">Contact</a></li>
+                </ul>
+            </div>
+    
+            <div style="flex: 1 1 300px; padding: 10px;">
+                <h3>Contact Us</h3>
+                <p>123 Barber Street, City Name</p>
+                <p>Phone: (123) 456-7890</p>
+                <p>Email: info@barbershop.com</p>
+            </div>
+        </div>
+    
+        <div style="margin-top: 20px;">
+            <a href="#" style="margin: 0 10px; color: #ff4500; font-size: 24px; text-decoration: none;">
+                <i class="fab fa-facebook-f"></i> </a>
+            <a href="#" style="margin: 0 10px; color: #ff4500; font-size: 24px; text-decoration: none;">
+                <i class="fab fa-instagram"></i> </a>
+            <a href="#" style="margin: 0 10px; color: #ff4500; font-size: 24px; text-decoration: none;">
+                <i class="fab fa-twitter"></i> </a>
+        </div>
+    
+        <p style="margin-top: 20px;">&copy; 2025 Barber Shop. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const data = { /* tumhara data.json ka content */ };
+
+function getAnswer(question) {
+    const key = question.toLowerCase();
+    if (data[key]) {
+        return data[key];
+    } else {
+        return "Aap mujh se sirf in baaton ka pooch saktay hain: " + Object.keys(data).join(", ");
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // -------------------- Section Navigation --------------------
+    window.showSection = function(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Show home section by default
+    showSection('home');
+
+    // -------------------- Booking Form --------------------
+    window.submitBooking = function() {
+        const name = document.getElementById('name').value.trim();
+        const service = document.getElementById('service').value.trim();
+        const date = document.getElementById('date').value.trim();
+        const time = document.getElementById('time').value.trim();
+
+        if (name && service && date && time) {
+            alert(`Appointment for ${name} for ${service} on ${date} at ${time} has been booked successfully!`);
+            document.querySelector('.book-form').reset();
+            showSection('home');
+        } else {
+            alert('Please fill in all booking details.');
+        }
+    }
+
+    // -------------------- Contact Form --------------------
+    window.submitContactForm = function(event) {
+        event.preventDefault();
+        const contactName = document.getElementById('contact-name').value.trim();
+        const contactEmail = document.getElementById('contact-email').value.trim();
+        const contactMessage = document.getElementById('contact-message').value.trim();
+
+        if (contactName && contactEmail && contactMessage) {
+            alert("Your message has been sent successfully!");
+            console.log('Contact Form Submitted:', { contactName, contactEmail, contactMessage });
+            document.querySelector('#contact .book-form').reset();
+        } else {
+            alert('Please fill in all contact details.');
+        }
+    }
+
+    // -------------------- Footer Year --------------------
+    const yearElement = document.getElementById('year');
+    if (yearElement) {
+        yearElement.innerText = new Date().getFullYear();
+    }
+
+    // -------------------- Chat Elements --------------------
+    const toggle = document.getElementById('chatToggle');
+    const popup = document.getElementById('chatPopup');
+    const closeBtn = document.getElementById('closeChat');
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatBody = document.getElementById('chatBody');
+
+    let isOpen = false;
+    let isWaiting = false;
+    // Flag to track if the welcome message has been shown
+    let hasWelcomed = false;
+
+    // Clear chat on load
+    if (chatBody) chatBody.innerHTML = '';
+    localStorage.removeItem('noirChat');
+
+    // -------------------- Append Chat Message --------------------
+    function appendMessage(txt, cls) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + cls;
+        div.textContent = txt;
+        chatBody.appendChild(div);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        return div;
+    }
+
+    // Function to show the welcome message
+    function showWelcomeMessage() {
+        if (!hasWelcomed && chatBody) {
+            appendMessage("Hi! I'm NoirForge AI. How can I assist you with your grooming or booking today?", 'bot');
+            hasWelcomed = true; // Set flag so it only runs once
+        }
+    }
+
+    // -------------------- Toggle Chat --------------------
+    if (toggle) {
+        toggle.addEventListener('click', function() {
+            isOpen = !isOpen;
+            popup.style.display = isOpen ? 'flex' : 'none';
+            if (isOpen) {
+                if (input) input.focus();
+                // Show welcome message when opening
+                showWelcomeMessage();
+            }
+        });
+    }
+
+    // -------------------- Close Chat --------------------
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            popup.style.display = 'none';
+            isOpen = false;
+        });
+    }
+
+    // -------------------- Message Sending --------------------
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+    }
+    if (sendBtn) sendBtn.addEventListener('click', handleSend);
+
+
+    // -------------------- Handle Chat (Local + Ollama) --------------------
+    async function handleSend() {
+        if (isWaiting) return;
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        input.value = '';
+        isWaiting = true;
+        sendBtn.disabled = true;
+
+        // Typing indicator
+        const temp = document.createElement('div');
+        temp.className = 'msg bot';
+        temp.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
+        chatBody.appendChild(temp);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        let localAnswer = null;
+        let localData = {};
+        
+        // Custom Fallback Message Topics (Used if data.json fetching fails or no local answer is found AND Ollama fails)
+        const customFallbackTopics = [
+            "What services do you offer", "How can I book an appointment", 
+            "Where are you located", "What is your phone number", 
+            "What is your email","who are your barbers","what are your barber specialties",
+            "do you offer kids haircuts","do you do hair coloring","do you offer facial treatments",
+            "what is a hot towel shave","do you provide grooming for events",
+            "do you offer hair repair treatments","how can i contact you",
+            "how do i get in touch"
+        ];
+        const customFallbackMessage = " Hi, You can only talk to me about these topics: " + customFallbackTopics.join(", ");
+
+
+        try {
+            // 1. Try to fetch data.json
+            const dataRes = await fetch('data.json');
+            localData = await dataRes.json();
+            
+            const lowerText = text.toLowerCase();
+            for (const key in localData) {
+                if (key.toLowerCase() === lowerText) {
+                    localAnswer = localData[key];
+                    break;
+                }
+            }
+            
+        } catch (err) {
+            // Handle data.json not found error gracefully, no need to show it to the user yet
+            console.warn('data.json not found or invalid. Relying solely on Ollama or custom fallback.', err);
+        }
+
+        // -------------------- Local Data Reply --------------------
+        if (localAnswer) {
+            temp.textContent = localAnswer;
+            chatBody.scrollTop = chatBody.scrollHeight;
+            isWaiting = false;
+            sendBtn.disabled = false;
+            return;
+        }
+
+        // -------------------- Ollama Fallback --------------------
+        const systemPrompt = `
+You are NoirForge AI, an assistant for a barber shop website.
+Keep answers short — maximum 2–3 lines.
+Respond only in clear, simple English.
+Focus on barber shop services, appointments, grooming, and related topics.
+If a question is off-topic, politely say you handle only shop-related questions.
+`;
+
+        try {
+            const payload = {
+                model: "phi3:latest",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: text }
+                ],
+                stream: true
+            };
+
+            const res = await fetch("http://localhost:11434/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                // *** IMPORTANT CHANGE: Use custom message instead of showing error on non-200 status ***
+                temp.textContent = customFallbackMessage; 
+            } else {
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let output = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split("\n").filter(Boolean);
+
+                    for (const line of lines) {
+                        try {
+                            const json = JSON.parse(line);
+                            const content = json?.message?.content;
+                            if (content) {
+                                output += content;
+                                // Limit to 3 lines max
+                                const trimmed = output.split("\n").slice(0, 3).join("\n");
+                                temp.textContent = trimmed;
+                                chatBody.scrollTop = chatBody.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing JSON chunk:", e, line);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            // *** IMPORTANT CHANGE: Use custom message instead of showing connection error ***
+            temp.textContent = customFallbackMessage;
+            console.error("Ollama fetch error (used custom fallback):", err);
+        } finally {
+            isWaiting = false;
+            sendBtn.disabled = false;
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    }
+});
+    </script>
+
+</body>
+</html>
